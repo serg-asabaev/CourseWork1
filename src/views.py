@@ -3,7 +3,7 @@ import pandas as pd
 
 
 from read_files import read_excel
-
+from external_api import get_currency_rate
 
 def card_info(excel_data: list[dict], year: int, month: int, day: int):
 
@@ -68,7 +68,75 @@ def card_info(excel_data: list[dict], year: int, month: int, day: int):
 
 
 def get_top_five_operations(excel_data: list[dict], year: int, month: int, day: int):
-    return []
+
+    monthly_data = []
+    top_five = []
+
+    for record in excel_data:
+        record_date_str = record['Дата платежа']
+
+        if type(record_date_str) != str:
+            record_date_str = '01.01.1900'
+
+        if year == int(record_date_str.split('.')[2]) and month == int(record_date_str.split('.')[1]) \
+                and day >= int(record_date_str.split('.')[0]):
+            monthly_data.append(record)
+
+    sorted_list = sorted(monthly_data, key=lambda x: x["Сумма операции"], reverse=False)
+
+    ind = 0
+
+    for list_item in sorted_list:
+
+        date = list_item['Дата платежа']
+        amount = list_item['Сумма операции']
+        category = list_item['Категория']
+        description = list_item['Описание']
+
+        res_dict = {
+            "date": date,
+            "amount": amount,
+            "category": category,
+            "description": description
+        }
+
+        top_five.append(res_dict)
+
+        if ind > 5:
+            break
+        ind += 1
+
+    return top_five
+
+def get_currency_rates(excel_data: list[dict], year: int, month: int, day: int):
+
+    monthly_data = []
+    currencies = []
+    currency_rates = []
+
+    for record in excel_data:
+        record_date_str = record['Дата платежа']
+
+        if type(record_date_str) != str:
+            record_date_str = '01.01.1900'
+
+        if year == int(record_date_str.split('.')[2]) and month == int(record_date_str.split('.')[1]) \
+                and day >= int(record_date_str.split('.')[0]):
+            monthly_data.append(record)
+
+    for record in monthly_data:
+        currency = record['Валюта платежа']
+        if currency not in currencies:
+            currencies.append(currency)
+
+    for currency in currencies:
+        if currency != 'RUB':
+            currency_rate = {
+                currency: get_currency_rate(currency)
+            }
+            currency_rates.append(currency_rate)
+    return currency_rates
+    # for record in excel_data:
 
 
 def greetings(date_time:str):
@@ -108,6 +176,8 @@ def greetings(date_time:str):
 
     top_transactions = get_top_five_operations(excel_data, year, month, day)
     result['top_transactions'] = top_transactions
+
+    result['currency_rates'] = get_currency_rates(excel_data, year, month, day)
 
     return result
 
