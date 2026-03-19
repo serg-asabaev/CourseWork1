@@ -1,7 +1,10 @@
 from views import greetings
+from services import physical_transactions
 
 if __name__ == '__main__':
 
     my_date = '2020-03-11 20:51:36'
 
-    print(greetings(my_date))
+    # print(greetings(my_date))
+
+    print(physical_transactions())
