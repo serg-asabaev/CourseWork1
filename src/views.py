@@ -3,9 +3,10 @@ import pandas as pd
 
 
 from read_files import read_excel
-from external_api import get_currency_rate
+from external_api import get_actual_currency_rate, get_action_prices
 
 def card_info(excel_data: list[dict], year: int, month: int, day: int):
+    """ Получение информации по картам """
 
     operations_info = []
     cards = []
@@ -68,6 +69,7 @@ def card_info(excel_data: list[dict], year: int, month: int, day: int):
 
 
 def get_top_five_operations(excel_data: list[dict], year: int, month: int, day: int):
+    """ Получение топ-5 транзакций по сумме платежа """
 
     monthly_data = []
     top_five = []
@@ -108,36 +110,6 @@ def get_top_five_operations(excel_data: list[dict], year: int, month: int, day: 
 
     return top_five
 
-def get_currency_rates(excel_data: list[dict], year: int, month: int, day: int):
-
-    monthly_data = []
-    currencies = []
-    currency_rates = []
-
-    for record in excel_data:
-        record_date_str = record['Дата платежа']
-
-        if type(record_date_str) != str:
-            record_date_str = '01.01.1900'
-
-        if year == int(record_date_str.split('.')[2]) and month == int(record_date_str.split('.')[1]) \
-                and day >= int(record_date_str.split('.')[0]):
-            monthly_data.append(record)
-
-    for record in monthly_data:
-        currency = record['Валюта платежа']
-        if currency not in currencies:
-            currencies.append(currency)
-
-    for currency in currencies:
-        if currency != 'RUB':
-            currency_rate = {
-                currency: get_currency_rate(currency)
-            }
-            currency_rates.append(currency_rate)
-    return currency_rates
-    # for record in excel_data:
-
 
 def greetings(date_time:str):
     """ Функция приветствия. В качестве результата выдает строку приветствия на основе времени  """
@@ -177,7 +149,7 @@ def greetings(date_time:str):
     top_transactions = get_top_five_operations(excel_data, year, month, day)
     result['top_transactions'] = top_transactions
 
-    result['currency_rates'] = get_currency_rates(excel_data, year, month, day)
+    result['currency_rates'] = get_actual_currency_rate()
+    result['stock_prices'] = get_action_prices(date_time)
 
     return result
-

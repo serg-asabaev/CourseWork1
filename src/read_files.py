@@ -6,4 +6,3 @@ def read_excel(file_path: str) -> list[dict]:
     result = df.to_dict(orient="records")
 
     return result
-
