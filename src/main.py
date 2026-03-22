@@ -13,6 +13,6 @@ if __name__ == '__main__':
     #
     # print(physical_transactions())
 
-    df = pd.read_excel('../data/operations.xlsx', index_col=0)
-    result = df.to_dict(orient="records")
+    df = pd.read_excel('../data/operations.xlsx')
+    # result = df.to_dict(orient="records", )
     print(spending_by_workday(df, my_date))
